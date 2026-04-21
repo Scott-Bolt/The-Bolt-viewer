@@ -1,50 +1,47 @@
-<!-- Updated index.html with all missing JavaScript functions for interactive controls -->
-<script>
-function toggleHeadlights() {
-    // Code to toggle headlights
-}
-
-function toggleRoofLights() {
-    // Code to toggle roof lights
-}
-
-function controlWipers() {
-    // Code to control wipers
-}
-
-function controlWinch() {
-    // Code to control winch
-}
-
-function controlNet() {
-    // Code to control net
-}
-
-function controlRoof() {
-    // Code to control roof
-}
-
-function controlRegenBrake() {
-    // Code to control regenerative braking
-}
-
-function controlCockpitCamera() {
-    // Code to control cockpit camera
-}
-
-function controlSteering() {
-    // Code to control steering
-}
-
-function controlSuspension() {
-    // Code to control suspension
-}
-
-function controlThrottle() {
-    // Code to control throttle
-}
-
-function controlSeat() {
-    // Code to control seat
-}
-</script>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>The Bolt Viewer</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script>
+        // JavaScript functions
+        function toggleHeadlights() { /* implementation */ }
+        function toggleRooflights() { /* implementation */ }
+        function toggleWipers() { /* implementation */ }
+        function toggleWinch() { /* implementation */ }
+        function toggleNet() { /* implementation */ }
+        function toggleRoof() { /* implementation */ }
+        function toggleRegen() { /* implementation */ }
+        function toggleCockpit() { /* implementation */ }
+        function setSteering() { /* implementation */ }
+        function setRegen() { /* implementation */ }
+        function setSusp() { /* implementation */ }
+        function setThrottle() { /* implementation */ }
+        function setSeatL() { /* implementation */ }
+        function setSeatR() { /* implementation */ }
+        function toggleTVDemo() { /* implementation */ }
+        function setSlipWheel() { /* implementation */ }
+        function toggleSpec() { /* implementation */ }
+        function toggleBom() { /* implementation */ }
+        function toggleHelp() { /* implementation */ }
+        function sv() { /* camera function implementation */ }
+        // Three.js integration
+        let scene = new THREE.Scene();
+        let camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+        let renderer = new THREE.WebGLRenderer();
+        renderer.setSize(window.innerWidth, window.innerHeight);
+        document.body.appendChild(renderer.domElement);
+        // Add your 3D model geometry here
+        // Animation loop
+        function animate() {
+            requestAnimationFrame(animate);
+            renderer.render(scene, camera);
+        }
+        animate();
+    </script>
+</head>
+<body>
+</body>
+</html>
