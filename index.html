@@ -3,45 +3,82 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>The Bolt Viewer</title>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <title>3D Viewer</title>
+    <style>
+        body { margin: 0; }
+        canvas { display: block; }
+        #controls { position: absolute; top: 10px; left: 10px; }
+    </style>
+</head>
+<body>
+    <div id="controls">
+        <button id="headlights">Toggle Headlights</button>
+        <button id="roofLights">Toggle Roof Lights</button>
+        <button id="wipers">Toggle Wipers</button>
+        <button id="winch">Toggle Winch</button>
+        <button id="net">Toggle Net</button>
+        <button id="roof">Toggle Roof</button>
+        <button id="regen">Toggle Regen</button>
+        <button id="cockpit">Toggle Cockpit</button>
+        <br>
+        <label for="steering">Steering: </label>
+        <input type="range" id="steering" min="-1" max="1" step="0.01" value="0">
+        <label for="suspension">Suspension: </label>
+        <input type="range" id="suspension" min="0" max="1" step="0.01" value="0.5">
+        <label for="throttle">Throttle: </label>
+        <input type="range" id="throttle" min="0" max="1" step="0.01" value="0">
+        <label for="regenSlider">Regen: </label>
+        <input type="range" id="regenSlider" min="0" max="1" step="0.01" value="0.5">
+    </div>
+    <script src="https://threejs.org/build/three.js"></script>
     <script>
-        // JavaScript functions
-        function toggleHeadlights() { /* implementation */ }
-        function toggleRooflights() { /* implementation */ }
-        function toggleWipers() { /* implementation */ }
-        function toggleWinch() { /* implementation */ }
-        function toggleNet() { /* implementation */ }
-        function toggleRoof() { /* implementation */ }
-        function toggleRegen() { /* implementation */ }
-        function toggleCockpit() { /* implementation */ }
-        function setSteering() { /* implementation */ }
-        function setRegen() { /* implementation */ }
-        function setSusp() { /* implementation */ }
-        function setThrottle() { /* implementation */ }
-        function setSeatL() { /* implementation */ }
-        function setSeatR() { /* implementation */ }
-        function toggleTVDemo() { /* implementation */ }
-        function setSlipWheel() { /* implementation */ }
-        function toggleSpec() { /* implementation */ }
-        function toggleBom() { /* implementation */ }
-        function toggleHelp() { /* implementation */ }
-        function sv() { /* camera function implementation */ }
-        // Three.js integration
-        let scene = new THREE.Scene();
-        let camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
-        let renderer = new THREE.WebGLRenderer();
-        renderer.setSize(window.innerWidth, window.innerHeight);
-        document.body.appendChild(renderer.domElement);
-        // Add your 3D model geometry here
-        // Animation loop
+        let scene, camera, renderer;
+        init();
+
+        function init() {
+            scene = new THREE.Scene();
+            camera = new THREE.PerspectiveCamera(75, window.innerWidth/window.innerHeight, 0.1, 1000);
+            renderer = new THREE.WebGLRenderer();
+            renderer.setSize(window.innerWidth, window.innerHeight);
+            document.body.appendChild(renderer.domElement);
+
+            // Mouse and Wheel interactions
+            window.addEventListener('mousemove', onMouseMove);
+            window.addEventListener('wheel', onMouseWheel);
+
+            // Create 3D objects here...
+            // e.g., addSphere();
+
+            animate();
+        }
+
         function animate() {
             requestAnimationFrame(animate);
             renderer.render(scene, camera);
         }
-        animate();
+
+        function onMouseMove(event) {
+            // Handle mouse move events for rotation
+        }
+
+        function onMouseWheel(event) {
+            // Handle mouse wheel events for zoom
+        }
+
+        // Add event listeners for controls
+        document.getElementById('headlights').addEventListener('click', toggleHeadlights);
+        // ... other toggle functions
+        document.getElementById('steering').addEventListener('input', updateSteering);
+        // ... other slider functions
+
+        function toggleHeadlights() {
+            // Implementation of headlights toggle
+        }
+
+        function updateSteering() {
+            // Implementation of steering update based on slider
+        }
+        // Add corresponding functions to control each 3D object
     </script>
-</head>
-<body>
 </body>
 </html>
