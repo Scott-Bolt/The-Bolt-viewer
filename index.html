@@ -1,84 +1,248 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>3D Viewer</title>
-    <style>
-        body { margin: 0; }
-        canvas { display: block; }
-        #controls { position: absolute; top: 10px; left: 10px; }
-    </style>
+<title>BOLT AWD Electric Mini Baja v6.3 — Shipitdone Technologies</title>
+<meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
+<style>
+* { margin:0; padding:0; box-sizing:border-box; }
+body { background:#2d2d2d; font-family:'Segoe UI',system-ui,sans-serif; color:#ddd; }
+canvas { display:block; width:100%; cursor:grab; }
+#controls { padding:6px 10px; background:#222; display:flex; gap:4px; flex-wrap:wrap; align-items:center; border-bottom:1px solid #333; }
+button { padding:5px 14px; border:1px solid #444; border-radius:4px; background:#2a2a2a; cursor:pointer; font-size:12px; color:#ccc; transition:all .15s; }
+button:hover { background:#3a3a3a; border-color:#666; }
+button.on { background:#CC5522; border-color:#ff7733; color:#fff; font-weight:bold; }
+#controls2 { padding:6px 10px; background:#1e1e1e; display:flex; gap:10px; flex-wrap:wrap; align-items:center; border-bottom:1px solid #333; }
+#controls2 label { font-size:12px; color:#999; }
+#controls2 input[type=range] { width:100px; accent-color:#CC5522; }
+#msg { padding:4px 10px; font-size:11px; color:#888; background:#2d2d2d; }
+#info { padding:8px 10px; font-size:11px; color:#aaa; background:#222; line-height:1.7; }
+.panel-btn { background:#333!important; border-color:#555!important; }
+.panel-btn.on { background:#CC5522!important; }
+#specPanel, #bomPanel { display:none; position:fixed; top:46px; right:8px; width:420px; max-height:calc(100vh - 120px); overflow-y:auto; background:rgba(20,20,20,0.96); border:1px solid #444; padding:12px; border-radius:4px; z-index:100; }
+#specPanel.show, #bomPanel.show { display:block; }
+#helpPanel { display:none; position:fixed; top:50%; left:50%; transform:translate(-50%,-50%); width:540px; max-height:80vh; overflow-y:auto; background:rgba(20,20,20,0.97); border:1px solid #444; padding:20px; border-radius:4px; z-index:200; }
+#helpPanel.show { display:block; }
+.panel-close { cursor:pointer; color:#666; float:right; }
+</style>
 </head>
 <body>
-    <div id="controls">
-        <button id="headlights">Toggle Headlights</button>
-        <button id="roofLights">Toggle Roof Lights</button>
-        <button id="wipers">Toggle Wipers</button>
-        <button id="winch">Toggle Winch</button>
-        <button id="net">Toggle Net</button>
-        <button id="roof">Toggle Roof</button>
-        <button id="regen">Toggle Regen</button>
-        <button id="cockpit">Toggle Cockpit</button>
-        <br>
-        <label for="steering">Steering: </label>
-        <input type="range" id="steering" min="-1" max="1" step="0.01" value="0">
-        <label for="suspension">Suspension: </label>
-        <input type="range" id="suspension" min="0" max="1" step="0.01" value="0.5">
-        <label for="throttle">Throttle: </label>
-        <input type="range" id="throttle" min="0" max="1" step="0.01" value="0">
-        <label for="regenSlider">Regen: </label>
-        <input type="range" id="regenSlider" min="0" max="1" step="0.01" value="0.5">
-    </div>
-    <script src="https://threejs.org/build/three.js"></script>
-    <script>
-        let scene, camera, renderer;
-        init();
+<canvas id="c" width="900" height="580"></canvas>
+<div id="controls">
+  <button onclick="sv(0.28,0.65,420)">Iso</button>
+  <button onclick="sv(0.05,1.57,380)">Side</button>
+  <button onclick="sv(0.05,0.0,360)">Front</button>
+  <button onclick="sv(1.45,0.0,380)">Top</button>
+  <button onclick="sv(-1.45,0.0,380)">Bottom</button>
+  <button onclick="sv(0.05,3.14,360)">Rear</button>
+  <button class="panel-btn" id="btnSpec" onclick="toggleSpec()">📋 Specs</button>
+  <button class="panel-btn" id="btnBom" onclick="toggleBom()">🔩 BOM</button>
+</div>
+<div id="controls2">
+  <button id="btnHL" onclick="toggleHeadlights()">💡 Headlights</button>
+  <button id="btnRL" onclick="toggleRooflights()">🔦 Roof Lights</button>
+  <button id="btnWP" onclick="toggleWipers()">🌧 Wipers</button>
+  <button id="btnWN" onclick="toggleWinch()">🪝 Winch</button>
+  <button id="btnNT" onclick="toggleNet()">🕸 Net</button>
+  <button id="btnRP" onclick="toggleRoof()">🏠 Roof</button>
+  <button id="btnRG" onclick="toggleRegen()">⚡ Regen</button>
+  <button id="btnCK" onclick="toggleCockpit()">🎥 Cockpit</button>
+  <label>🔄 Steering: <input type="range" id="steerSlider" min="-21" max="21" value="0" oninput="setSteering(this.value)"></label>
+  <label>⚡ Regen: <input type="range" id="regenSlider" min="0" max="100" value="40" oninput="setRegen(this.value)"></label>
+  <label>🔧 Suspension: <input type="range" id="suspSlider" min="-100" max="100" value="0" oninput="setSusp(this.value)"></label>
+  <label>🏎 Throttle: <input type="range" id="throttleSlider" min="0" max="100" value="0" oninput="setThrottle(this.value)"></label>
+  <button id="btnHelp" onclick="toggleHelp()" style="background:#CC5522;color:#fff;font-weight:bold;margin-left:12px">❓ Help</button>
+</div>
+<div id="msg">BOLT AWD Electric Mini Baja v6.3 — Drag to rotate, scroll to zoom</div>
+<div id="info"><b>Powertrain:</b> 4× QS260 5kW 120V | <b>Performance:</b> 65 mph top speed | <b>Weight:</b> ~977 lbs dry</div>
 
-        function init() {
-            scene = new THREE.Scene();
-            camera = new THREE.PerspectiveCamera(75, window.innerWidth/window.innerHeight, 0.1, 1000);
-            renderer = new THREE.WebGLRenderer();
-            renderer.setSize(window.innerWidth, window.innerHeight);
-            document.body.appendChild(renderer.domElement);
+<div id="specPanel"><span class="panel-close" onclick="toggleSpec()">✕</span><h2 style="color:#CC5522">Specs</h2><p>Motors: 4× QS260</p><p>Battery: 115.2V 100Ah</p><p>Top Speed: 65 mph</p></div>
+<div id="bomPanel"><span class="panel-close" onclick="toggleBom()">✕</span><h2 style="color:#CC5522">BOM</h2><p>168 Parts</p></div>
+<div id="helpPanel"><span class="panel-close" onclick="toggleHelp()">✕</span><h2 style="color:#CC5522">Controls</h2><p><b>Drag:</b> Rotate | <b>Scroll:</b> Zoom | <b>Buttons:</b> Toggle features | <b>Sliders:</b> Adjust parameters</p></div>
 
-            // Mouse and Wheel interactions
-            window.addEventListener('mousemove', onMouseMove);
-            window.addEventListener('wheel', onMouseWheel);
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script>
+var c = document.getElementById('c');
+var renderer = new THREE.WebGLRenderer({canvas:c, antialias:true});
+renderer.setSize(900, 580);
+renderer.setClearColor(0x2d2d2d, 1);
+var scene = new THREE.Scene();
+var cam = new THREE.PerspectiveCamera(45, 900/580, 0.1, 2000);
+cam.position.set(0, 0, 420);
+scene.add(new THREE.AmbientLight(0xffffff, 0.55));
+var dl = new THREE.DirectionalLight(0xffffff, 0.8);
+dl.position.set(100, 200, 150);
+scene.add(dl);
 
-            // Create 3D objects here...
-            // e.g., addSphere();
+var headlightsOn = false, roofLightsOn = false, wipersOn = false, winchDeployed = false;
+var netRolled = false, roofVisible = true, regenOn = false, cockpitView = false;
+var steeringValue = 0, suspensionValue = 0;
 
-            animate();
-        }
+var frontWheels = [], rearWheels = [], headlightMeshes = [], roofLightMeshes = [];
+var bodyMesh, roofPanel, mouseX = 0, mouseY = 0, isDragging = false;
 
-        function animate() {
-            requestAnimationFrame(animate);
-            renderer.render(scene, camera);
-        }
+// Create body
+var bodyGeo = new THREE.BoxGeometry(20, 15, 40);
+var bodyMat = new THREE.MeshPhongMaterial({color: 0xCC5522});
+bodyMesh = new THREE.Mesh(bodyGeo, bodyMat);
+scene.add(bodyMesh);
 
-        function onMouseMove(event) {
-            // Handle mouse move events for rotation
-        }
+// Create wheels
+for(var i = 0; i < 4; i++) {
+  var wheelGeo = new THREE.CylinderGeometry(5, 5, 3, 16);
+  var wheelMat = new THREE.MeshPhongMaterial({color: 0x333333});
+  var wheel = new THREE.Mesh(wheelGeo, wheelMat);
+  wheel.rotation.z = Math.PI/2;
+  if(i < 2) {
+    wheel.position.set((i === 0 ? -10 : 10), -10, 15);
+    frontWheels.push(wheel);
+  } else {
+    wheel.position.set((i === 2 ? -10 : 10), -10, -15);
+    rearWheels.push(wheel);
+  }
+  scene.add(wheel);
+}
 
-        function onMouseWheel(event) {
-            // Handle mouse wheel events for zoom
-        }
+// Create headlights
+for(var i = 0; i < 2; i++) {
+  var lightGeo = new THREE.SphereGeometry(2, 8, 8);
+  var lightMat = new THREE.MeshBasicMaterial({color: 0x333322});
+  var light = new THREE.Mesh(lightGeo, lightMat);
+  light.position.set((i === 0 ? -8 : 8), 8, 25);
+  headlightMeshes.push(light);
+  scene.add(light);
+}
 
-        // Add event listeners for controls
-        document.getElementById('headlights').addEventListener('click', toggleHeadlights);
-        // ... other toggle functions
-        document.getElementById('steering').addEventListener('input', updateSteering);
-        // ... other slider functions
+// Create roof lights
+for(var i = 0; i < 4; i++) {
+  var roofLightGeo = new THREE.CylinderGeometry(1.5, 1.5, 1, 8);
+  var roofLightMat = new THREE.MeshBasicMaterial({color: 0x554400});
+  var roofLight = new THREE.Mesh(roofLightGeo, roofLightMat);
+  roofLight.position.set((i % 2 === 0 ? -6 : 6), 10, -10 + (i < 2 ? -3 : 3));
+  roofLightMeshes.push(roofLight);
+  scene.add(roofLight);
+}
 
-        function toggleHeadlights() {
-            // Implementation of headlights toggle
-        }
+// Create roof panel
+var roofGeo = new THREE.BoxGeometry(18, 1, 35);
+var roofMat = new THREE.MeshPhongMaterial({color: 0xCC5522});
+roofPanel = new THREE.Mesh(roofGeo, roofMat);
+roofPanel.position.y = 10;
+scene.add(roofPanel);
 
-        function updateSteering() {
-            // Implementation of steering update based on slider
-        }
-        // Add corresponding functions to control each 3D object
-    </script>
+// Mouse controls
+c.addEventListener('mousedown', function() { isDragging = true; });
+c.addEventListener('mouseup', function() { isDragging = false; });
+c.addEventListener('mousemove', function(e) {
+  if(isDragging) {
+    mouseX += e.movementX * 0.005;
+    mouseY += e.movementY * 0.005;
+  }
+});
+c.addEventListener('wheel', function(e) {
+  e.preventDefault();
+  cam.position.z += e.deltaY * 0.5;
+  cam.position.z = Math.max(100, Math.min(1000, cam.position.z));
+});
+
+// Control functions
+function toggleHeadlights() {
+  headlightsOn = !headlightsOn;
+  var color = headlightsOn ? 0xFFFF99 : 0x333322;
+  headlightMeshes.forEach(m => m.material.color.setHex(color));
+  document.getElementById('btnHL').classList.toggle('on', headlightsOn);
+}
+
+function toggleRooflights() {
+  roofLightsOn = !roofLightsOn;
+  var color = roofLightsOn ? 0xFFFF00 : 0x554400;
+  roofLightMeshes.forEach(m => m.material.color.setHex(color));
+  document.getElementById('btnRL').classList.toggle('on', roofLightsOn);
+}
+
+function toggleWipers() {
+  wipersOn = !wipersOn;
+  document.getElementById('btnWP').classList.toggle('on', wipersOn);
+}
+
+function toggleWinch() {
+  winchDeployed = !winchDeployed;
+  document.getElementById('btnWN').classList.toggle('on', winchDeployed);
+}
+
+function toggleNet() {
+  netRolled = !netRolled;
+  document.getElementById('btnNT').classList.toggle('on', netRolled);
+}
+
+function toggleRoof() {
+  roofVisible = !roofVisible;
+  roofPanel.visible = roofVisible;
+  document.getElementById('btnRP').classList.toggle('on', roofVisible);
+}
+
+function toggleRegen() {
+  regenOn = !regenOn;
+  document.getElementById('btnRG').classList.toggle('on', regenOn);
+}
+
+function toggleCockpit() {
+  cockpitView = !cockpitView;
+  document.getElementById('btnCK').classList.toggle('on', cockpitView);
+  if(cockpitView) cam.position.set(0, 5, 10);
+  else cam.position.z = 420;
+}
+
+function setSteering(value) {
+  steeringValue = value;
+  var angle = (value / 21) * 0.4;
+  frontWheels.forEach(w => w.rotation.y = angle);
+}
+
+function setRegen(value) {}
+function setSusp(value) {
+  suspensionValue = value;
+  var offset = (value / 100) * 3;
+  bodyMesh.position.y = -offset;
+}
+function setThrottle(value) {}
+function setSeatR(value) {}
+function setSeatL(value) {}
+function toggleTVDemo(checked) {}
+function setSlipWheel(value) {}
+
+function toggleSpec() {
+  document.getElementById('specPanel').classList.toggle('show');
+  document.getElementById('btnSpec').classList.toggle('on');
+}
+
+function toggleBom() {
+  document.getElementById('bomPanel').classList.toggle('show');
+  document.getElementById('btnBom').classList.toggle('on');
+}
+
+function toggleHelp() {
+  document.getElementById('helpPanel').classList.toggle('show');
+}
+
+function sv(rotX, rotY, distance) {
+  cam.position.z = distance;
+  cam.rotation.order = 'YXZ';
+  cam.rotation.y = rotY;
+  cam.rotation.x = rotX;
+  cam.lookAt(0, 0, 0);
+}
+
+// Animation loop
+function animate() {
+  requestAnimationFrame(animate);
+  bodyMesh.rotation.x = mouseY;
+  bodyMesh.rotation.y = mouseX;
+  frontWheels.forEach(w => w.rotation.x = mouseY);
+  rearWheels.forEach(w => w.rotation.x = mouseY);
+  renderer.render(scene, cam);
+}
+
+animate();
+</script>
 </body>
 </html>
